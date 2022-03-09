@@ -6,6 +6,7 @@ const float voutLower = 0.5;
 const float voutUpper = 4.5;
 const int transducerMaxPsi = 174;
 int targetPressure;
+const int intakePin1 = 2, intakePin2 = 3, exhaustPin1 = 4, exhaustPin2 = 5;
 
 float analogToPsi(float analogValue){
   pressureVolts = analogValue * 5.0 / 1023.0;
@@ -58,12 +59,18 @@ void initializeTargetPressure() {
 void setup(){
   Serial.begin(9600);
   Serial.print("Welcome to Cytis\n");
+  pinMode(intakePin1, OUTPUT);
+  pinMode(intakePin2, OUTPUT);
+  pinMode(exhaustPin1, OUTPUT);
+  pinMode(exhaustPin2, OUTPUT);
   initializeTargetPressure();
 }
 
 void loop(){
   pressureValue = analogRead(pressurePin);
   currentPressurePsi = analogToPsi(pressureValue);
+  //pressureAdjust(intakePin1, exhaustPin1);
+  valveCycle(intakePin1);
   pressureDebugDisplay();
   delay(500);
 }
