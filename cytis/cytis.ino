@@ -1,4 +1,5 @@
 #include <SoftwareSerial.h>
+#include <string.h>
 
 const int pressurePin = A0;
 const float voutLower = 0.5;
@@ -11,6 +12,7 @@ float currentPressurePsi = 0;
 float pressureVolts = 0;
 int targetPressure;
 char serialInput[16];
+bool toSetPressure = false;
 
 SoftwareSerial ble(rx, tx);
 
@@ -61,6 +63,9 @@ void pressureAdjust(int intakePin, int exhaustPin) {
     valveCycle(exhaustPin); //let out pressure 
   else
     valveCycle(intakePin); //let pressure in
+
+  if(currentPressurePsi == targetPressure)
+    toSetPressure = false;
 }
 
 void initializeTargetPressure() {
@@ -90,14 +95,21 @@ void commandProcessing(char command[]) {
     ble.print(currentPressurePsi);
     ble.println(" psi");
   }
+  else if (strstr(command, "setPressure")) {
+    char* slicedCommand = strtok(command, ' ');
+    slicedCommand = strtok(NULL, ' ');
+    Serial.print(slicedCommand);
+    targetPressure = atoi(slicedCommand);
+    Serial.print("target pressure set to ");
+    Serial.println(targetPressure);
+    toSetPressure = true;
+  }
 }
 
 void loop(){
   int letter = 0;
   pressureValue = analogRead(pressurePin);
   currentPressurePsi = analogToPsi(pressureValue);
-  //pressureAdjust(intakePin1, exhaustPin1);
-  //pressureDebugDisplay();
   if(ble.available() > 0){
     while(ble.available() > 0){
       serialInput[letter] = ble.read();
@@ -105,6 +117,10 @@ void loop(){
     }
     serialInput[letter]='\0';
     commandProcessing(serialInput);
+  }
+
+  if (toSetPressure) {
+    pressureAdjust(intakePin1, exhaustPin1);
   }
   delay(500);
 }
