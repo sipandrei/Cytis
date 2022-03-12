@@ -1,4 +1,4 @@
-#include <SoftwareSerial.h>
+ #include <SoftwareSerial.h>
 #include <string.h>
 
 const int pressurePin = A0;
@@ -22,7 +22,8 @@ float analogToPsi(float analogValue){
 }
 
 void pressureDebugDisplay(){
-  Serial.print("Value ");
+  Serial.print(toSetPressure);
+  Serial.print(" Value ");
   Serial.print(pressureValue);
   Serial.print(" Volt ");
   Serial.print(pressureVolts);
@@ -90,19 +91,24 @@ void setup(){
 }
 
 void commandProcessing(char command[]) {
-  ble.print(command);
-  if(strcmp(command, "currentPressure")){
+  if(strcmp(command, "c") == 13){
+    Serial.print('.');
     ble.print(currentPressurePsi);
     ble.println(" psi");
   }
   else if (strstr(command, "setPressure")) {
-    char* slicedCommand = strtok(command, ' ');
-    slicedCommand = strtok(NULL, ' ');
-    Serial.print(slicedCommand);
-    targetPressure = atoi(slicedCommand);
-    Serial.print("target pressure set to ");
-    Serial.println(targetPressure);
-    toSetPressure = true;
+    char* slicedCommand = strtok(command, " ");   
+    slicedCommand = strtok(NULL, " ");
+    if(atoi(slicedCommand) != 0)
+    {
+      targetPressure = atoi(slicedCommand);
+      Serial.print("target pressure set to ");
+      Serial.println(targetPressure);
+      toSetPressure = true;
+      ble.println("Pressure is adjusting to given target...");
+    }
+    else
+      Serial.println("givenPressure is NULL");
   }
 }
 
@@ -118,9 +124,11 @@ void loop(){
     serialInput[letter]='\0';
     commandProcessing(serialInput);
   }
-
   if (toSetPressure) {
     pressureAdjust(intakePin1, exhaustPin1);
+    if (wholePart(currentPressurePsi) == targetPressure)
+      toSetPressure = false;
   }
+  pressureDebugDisplay();
   delay(500);
 }
