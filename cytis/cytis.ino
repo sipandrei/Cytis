@@ -65,14 +65,41 @@ void pressureAdjust(int intakePin, int exhaustPin) {
   else
     valveCycle(intakePin); //let pressure in
 
-  if(currentPressurePsi == targetPressure)
-    toSetPressure = false;
+  if(wholePart(currentPressurePsi) == targetPressure)
+    {
+      toSetPressure = false;
+      Serial.println("Pressure Adjusted");
+    }
 }
 
 void initializeTargetPressure() {
   pressureValue = analogRead(pressurePin);
   currentPressurePsi = analogToPsi(pressureValue);
   targetPressure = currentPressurePsi;
+}
+
+void commandProcessing(char command[]) {   
+  Serial.println(command);
+  Serial.println(strcmp(command, "c"));
+  if(strcmp(command, "c") == 0){
+    Serial.print('.');
+    ble.print("current ");
+    ble.println(currentPressurePsi);
+  }
+  else if (strstr(command, "setPressure")) {
+    char* slicedCommand = strtok(command, " ");   
+    slicedCommand = strtok(NULL, " ");
+    if(atoi(slicedCommand) != 0)
+    {
+      targetPressure = atoi(slicedCommand);
+      Serial.print("target pressure set to ");
+      Serial.println(targetPressure);
+      toSetPressure = true;
+      Serial.println("Pressure is adjusting to given target...");
+    }
+    else
+      Serial.println("givenPressure is NULL");
+  }
 }
 
 void setup(){
@@ -90,28 +117,6 @@ void setup(){
   initializeTargetPressure();
 }
 
-void commandProcessing(char command[]) {
-  if(strcmp(command, "c") == 13){
-    Serial.print('.');
-    ble.print(currentPressurePsi);
-    ble.println(" psi");
-  }
-  else if (strstr(command, "setPressure")) {
-    char* slicedCommand = strtok(command, " ");   
-    slicedCommand = strtok(NULL, " ");
-    if(atoi(slicedCommand) != 0)
-    {
-      targetPressure = atoi(slicedCommand);
-      Serial.print("target pressure set to ");
-      Serial.println(targetPressure);
-      toSetPressure = true;
-      ble.println("Pressure is adjusting to given target...");
-    }
-    else
-      Serial.println("givenPressure is NULL");
-  }
-}
-
 void loop(){
   int letter = 0;
   pressureValue = analogRead(pressurePin);
@@ -126,9 +131,8 @@ void loop(){
   }
   if (toSetPressure) {
     pressureAdjust(intakePin1, exhaustPin1);
-    if (wholePart(currentPressurePsi) == targetPressure)
-      toSetPressure = false;
   }
   pressureDebugDisplay();
+  
   delay(500);
 }
