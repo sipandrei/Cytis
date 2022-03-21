@@ -60,8 +60,9 @@ int wholePart(float number) {
 }
 
 void pressureAdjust(int intakePin, int exhaustPin) {
+  readPressure();
   if(wholePart(currentPressurePsi) >= targetPressure)
-    valveCycle(exhaustPin); //let out pressure 
+    valveCycle(exhaustPin); //let pressure out
   else
     valveCycle(intakePin); //let pressure in
 
@@ -102,6 +103,11 @@ void commandProcessing(char command[]) {
   }
 }
 
+void readPressure(){
+  pressureValue = analogRead(pressurePin);
+  currentPressurePsi = analogToPsi(pressureValue);
+}
+
 void setup(){
   Serial.begin(9600);
   ble.begin(9600);
@@ -119,8 +125,7 @@ void setup(){
 
 void loop(){
   int letter = 0;
-  pressureValue = analogRead(pressurePin);
-  currentPressurePsi = analogToPsi(pressureValue);
+  readPressure();
   if(ble.available() > 0){
     while(ble.available() > 0){
       serialInput[letter] = ble.read();
