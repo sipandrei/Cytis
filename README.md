@@ -12,3 +12,12 @@
  * Read the current air pressure
  * Inflate the tire
  * Deflate the tire 
+ 
+## Technologies used
+ * Arduino ecosystem
+ * Ruby on Rails
+ * Web Bluetooth
+ * PWA
+
+## System Requirements
+ * device capable of accesing the Internet using a Web Bluetooth compatible browser(currently Chrome or Opera)
