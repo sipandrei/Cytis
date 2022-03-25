@@ -23,7 +23,7 @@
  * device capable of accesing the Internet using a Web Bluetooth compatible browser(currently Chrome or Opera)
 
 ## Do you want to run the web interface locally?
-* Have RoR installed
+* Have RoR v6.1.4 installed and Ruby v3.0.3
 * Run `git clone git@github.com:sipandrei/Cytis_frontend.git`
 * Run `bundle install`
 * Run `rails db:migrate`
