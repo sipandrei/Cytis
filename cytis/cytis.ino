@@ -1,12 +1,15 @@
- #include <SoftwareSerial.h>
+#include <SoftwareSerial.h>
+#include <Servo.h>
 #include <string.h>
 
+Servo servoIntake;
 const int pressurePin = A0;
 const float voutLower = 0.5;
 const float voutUpper = 4.5;
 const int transducerMaxPsi = 174;
-const int intakePin1 = 2, intakePin2 = 3, exhaustPin1 = 4, exhaustPin2 = 5;
-const int tx = 7, rx = 6;
+const int exhaustPin = 2;
+const int servoPin = 5;
+const int tx = 4, rx = 3;
 float pressureValue = 0;
 float currentPressurePsi = 0;
 float pressureVolts = 0;
@@ -47,11 +50,10 @@ void valveCycle(int valvePin) {
 }
 
 void pinsLow() {
-  digitalWrite(intakePin1, LOW);
-  digitalWrite(intakePin2, LOW);
-  digitalWrite(exhaustPin1, LOW);
-  digitalWrite(exhaustPin2, LOW);
-}
+  digitalWrite(exhaustPin, LOW);
+  servoIntake.write(0);
+  delay(10);
+ }
 
 int wholePart(float number) {
   int wholeNum;
@@ -59,12 +61,25 @@ int wholePart(float number) {
   return wholeNum;
 }
 
+void pressureIn(Servo servo){
+  
+  for(int pos = 0; pos <= 100; pos++){
+    servo.write(pos);
+    delay(10);
+  }
+}
+
 void pressureAdjust(int intakePin, int exhaustPin) {
   readPressure();
   if(wholePart(currentPressurePsi) >= targetPressure)
-    valveCycle(exhaustPin); //let pressure out
+     valveCycle(exhaustPin);//let pressure out
   else
-    valveCycle(intakePin); //let pressure in
+    {
+      pressureIn(servoIntake); // let pressure in
+      servoIntake.write(0);
+      delay(20);
+      toSetPressure = false; // failsafe for servo
+    }
 
   if(wholePart(currentPressurePsi) == targetPressure)
     {
@@ -110,15 +125,13 @@ void readPressure(){
 
 void setup(){
   Serial.begin(9600);
+  servoIntake.attach(servoPin);
   ble.begin(9600);
   ble.println("Connected to Cytis");
   Serial.print("Welcome to Cytis\n");
   pinMode(tx, OUTPUT);
   pinMode(rx, INPUT);
-  pinMode(intakePin1, OUTPUT);
-  pinMode(intakePin2, OUTPUT);
-  pinMode(exhaustPin1, OUTPUT);
-  pinMode(exhaustPin2, OUTPUT);
+  pinMode(exhaustPin, OUTPUT);
   pinsLow();
   initializeTargetPressure();
 }
@@ -135,7 +148,9 @@ void loop(){
     commandProcessing(serialInput);
   }
   if (toSetPressure) {
-    pressureAdjust(intakePin1, exhaustPin1);
+    pressureAdjust(servoPin, exhaustPin);
+    delay(20);
+    servoIntake.write(0);
   }
   pressureDebugDisplay();
   
