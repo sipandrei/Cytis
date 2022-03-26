@@ -1,30 +1,40 @@
 # Cytis
-## A centralized tire inflation system for bicycles
 
-## Summary 
-  How many times have you been on a ride and forgot to check the tire pressure before hitting the road (or the trails) or you were changing the terrain and you haven't got that perfect pressure. Well this product helps to prevent you from getting in that situation by allowing you to control how much air you got in your tires directly from your phone, or any device with bluetooth.
-  
-## What is Cytis made of 
-  For a start I am using an Arduino Nano hooked up to a CO2 canister connected with a hose to the air valve. The device will be mounted on the hub of the wheel in order to be less noticeable.
-  For the phone interface I've made a web app using Ruby on Rails, there, you can connect to the device using Web Bluetooth and create presets, after signing up.
-  
-## Main functions
- * Read the current air pressure
- * Inflate the tire
- * Deflate the tire 
- 
-## Technologies used
- * Arduino ecosystem
- * Ruby on Rails
- * Web Bluetooth
- * PWA
+## Un aparat telecomandat pentru modificarea presiunii la biciclete
 
-## System Requirements
- * device capable of accesing the Internet using a Web Bluetooth compatible browser(currently Chrome or Opera)
+## Rezumat
 
-## Do you want to run the web interface locally?
-* Have RoR v6.1.4 installed and Ruby v3.0.3
-* Run `git clone git@github.com:sipandrei/Cytis_frontend.git`
-* Run `bundle install`
-* Run `rails db:migrate`
-* Start the server and you should have a working Cytis web interface  
+De câte ori ai mers la o tură cu bicicleta și ai uitat să îți verifici presiunea din roți înainte de a pleca? Sau Poate ai decis să o iei pe macadam când aveai în plan doar asfalt lin și te-ai cam zdruncinat. Dacă ai pățit acestea, ei bine, Cytis îți poate veni în ajutor, dându-ți posibiliatea de a-ți regla presiunea direct de la telefon, sau orice dispozitiv cu bluetooth, acesta așteptând comenzile tale pe butucul roții. Din când în când va trebui schimbată canistra de aer.
+
+## Din ce este Cytis compus?
+
+Pentru început, acest proiect are două jumătăți: interfața web și dispozitivul în sine. Interfața web este construită în Ruby on Rails și configurată ca un Progressive Web App, pentru a putea fi instalată. Pe site este posibilă creearea unui cont(pentru autentificare am folosit Devise). Comunicarea este realizată folosind tehnologia Web Bluetooth. Dispozitivul este bazat pe un Arduino Nano cuplat cu un modul HM-10 pentru bluetooth. aerul de intrare este preluat dintr-o canistră de CO2, iar întreaga instalație este montată pe butucul roții pentru a încurca mai puțin.
+
+**Proiectul se află în stadiul de prototip, o variantă de producție fiind mult mai mică și mai fiabilă, însă am fost limitat de buget**
+
+## Cele patru lucruri principale pe care le face
+
+- Procesează comenzile de la interfața web
+- Citește presiunea actuală
+- Umflă cauciucul
+- Dezumflă cauciucul
+
+## Tehnologii utilizate
+
+- Arduino - partea fizică
+- Ruby on Rails - backend-ul interfeței web
+- HTML, CSS, JS - frontend-ul interfeței web
+- Web Bluetooth - comunicarea cu dispozitivul fizic - limitează browserul ce poate fi utilizat
+- PWA - permite instalarea site-ului
+
+## Cerințe de Sistem
+
+- Dispozitiv cu bluetooth, care poate accesa Internetul folosind Chrome(sau derivat) sau Opera
+
+## Dorești să rulezi interfața web local?
+
+- Ai nevoie de Ruby on Rails `v6.1.4` și Ruby `v3.0.3` instalat
+- Rulează `git clone git@github.com:sipandrei/Cytis_frontend.git`
+- Rulează `bundle install`
+- Rulează `rails db:migrate`
+- Pornește serverul și ar trebui să ai o interfață web Cytis ce rulează local

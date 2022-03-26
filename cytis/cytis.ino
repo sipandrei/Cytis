@@ -19,6 +19,7 @@ bool toSetPressure = false;
 
 SoftwareSerial ble(rx, tx);
 
+// functie pentru a transforma valoarea de pe pinul analogic in psi
 float analogToPsi(float analogValue){
   pressureVolts = analogValue * 5.0 / 1023.0;
   return transducerMaxPsi * ((pressureVolts - voutLower) / (voutUpper - voutLower));
@@ -43,12 +44,14 @@ void closeValve(int valvePin) {
   digitalWrite(valvePin, LOW);
 }
 
+// ciclaza valva la 100 milisecunde
 void valveCycle(int valvePin) {
   openValve(valvePin);
   delay(100); //valve open time
   closeValve(valvePin);
 }
 
+// initializeaza valva si servoul
 void pinsLow() {
   digitalWrite(exhaustPin, LOW);
   servoIntake.write(0);
@@ -61,6 +64,7 @@ int wholePart(float number) {
   return wholeNum;
 }
 
+// controlul servoului, se misca 100 de grade
 void pressureIn(Servo servo){
   
   for(int pos = 0; pos <= 100; pos++){
@@ -69,6 +73,7 @@ void pressureIn(Servo servo){
   }
 }
 
+// functia pentru ajustarea presiunii, lasa daca e prea mare, introduce daca e prea mica
 void pressureAdjust(int intakePin, int exhaustPin) {
   readPressure();
   if(wholePart(currentPressurePsi) >= targetPressure)
@@ -88,21 +93,23 @@ void pressureAdjust(int intakePin, int exhaustPin) {
     }
 }
 
+// initializeaza presiunea tinta cu valoarea actuala, just for peace of mind
 void initializeTargetPressure() {
   pressureValue = analogRead(pressurePin);
   currentPressurePsi = analogToPsi(pressureValue);
   targetPressure = currentPressurePsi;
 }
 
+// procesarea comenzilor de la bluetooth
 void commandProcessing(char command[]) {   
   Serial.println(command);
-  Serial.println(strcmp(command, "c"));
+  Serial.println(strcmp(command, "c")); // comanda c returneaza presiunea curenta
   if(strcmp(command, "c") == 0){
     Serial.print('.');
     ble.print("current ");
     ble.println(currentPressurePsi);
   }
-  else if (strstr(command, "setPressure")) {
+  else if (strstr(command, "setPressure")) { // comanda setPressure <numar> schimba presiunea tinta si incepe a merge spre ea
     char* slicedCommand = strtok(command, " ");   
     slicedCommand = strtok(NULL, " ");
     if(atoi(slicedCommand) != 0)
@@ -139,7 +146,7 @@ void setup(){
 void loop(){
   int letter = 0;
   readPressure();
-  if(ble.available() > 0){
+  if(ble.available() > 0){ // citirea comenzilor de la bluetooth
     while(ble.available() > 0){
       serialInput[letter] = ble.read();
       letter++;
@@ -147,7 +154,7 @@ void loop(){
     serialInput[letter]='\0';
     commandProcessing(serialInput);
   }
-  if (toSetPressure) {
+  if (toSetPressure) { // actioneaza schimbarea presiunii doar imediat dupa o comanda setPressure
     pressureAdjust(servoPin, exhaustPin);
     delay(20);
     servoIntake.write(0);
