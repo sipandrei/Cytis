@@ -64,10 +64,10 @@ int wholePart(float number) {
   return wholeNum;
 }
 
-// controlul servoului, se misca 100 de grade
+// controlul servoului, se misca 110 de grade
 void pressureIn(Servo servo){
   
-  for(int pos = 0; pos <= 100; pos++){
+  for(int pos = 0; pos <= 110; pos++){
     servo.write(pos);
     delay(10);
   }
